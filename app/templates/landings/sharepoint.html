@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Microsoft SharePoint</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,sans-serif;background:#f3f2f1;min-height:100vh;display:flex;flex-direction:column}
+#landing{flex:1;display:flex;flex-direction:column;background:#fff}
+.sp-topbar{background:#0078d4;height:48px;display:flex;align-items:center;padding:0 24px;gap:12px}
+.sp-topbar-logo{display:flex;align-items:center;gap:8px;color:#fff;font-size:15px;font-weight:600}
+.sp-topbar-logo svg{width:20px;height:20px}
+.sp-main{flex:1;max-width:600px;margin:0 auto;padding:48px 24px}
+.sp-breadcrumb{font-size:12px;color:#605e5c;margin-bottom:20px}
+.sp-breadcrumb a{color:#0078d4;text-decoration:none}
+.sp-card{border:1px solid #edebe9;border-radius:2px;padding:0;overflow:hidden;box-shadow:0 1.6px 3.6px rgba(0,0,0,.132)}
+.sp-card-preview{height:160px;background:linear-gradient(135deg,#e8f0fe,#c8d9f7);display:flex;align-items:center;justify-content:center;position:relative}
+.sp-file-icon{width:64px;height:64px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.sp-file-icon svg{width:40px;height:40px}
+.sp-card-body{padding:20px}
+.sp-card-name{font-size:18px;font-weight:600;color:#323130;margin-bottom:6px}
+.sp-card-meta{font-size:12px;color:#605e5c;margin-bottom:16px;line-height:1.6}
+.sp-card-meta span{color:#323130;font-weight:500}
+.sp-tag{display:inline-block;background:#eff6fc;border:1px solid #c7e0f4;color:#0078d4;font-size:11px;padding:2px 8px;border-radius:2px;margin-right:6px;margin-bottom:12px}
+.sp-divider{border:none;border-top:1px solid #edebe9;margin:16px 0}
+.sp-actions{display:flex;gap:10px;align-items:center}
+.btn-sp-primary{background:#0078d4;color:#fff;border:none;border-radius:2px;padding:9px 20px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-sp-primary:hover{background:#106ebe}
+.btn-sp-secondary{background:transparent;color:#0078d4;border:1px solid #0078d4;border-radius:2px;padding:8px 20px;font-size:14px;cursor:pointer;font-family:inherit}
+.sp-auth-note{font-size:12px;color:#605e5c;margin-left:auto;display:flex;align-items:center;gap:6px}
+.lock-icon{font-size:14px}
+.sp-footer{background:#f3f2f1;border-top:1px solid #edebe9;padding:12px 24px;font-size:11px;color:#605e5c;display:flex;gap:20px}
+.sp-footer a{color:#605e5c;text-decoration:none}
+.sp-footer a:hover{text-decoration:underline}
+
+/* MS LOGIN */
+#ms-login-wrap{display:none;flex:1;flex-direction:column;background:#f2f2f2}
+.page{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px}
+.box{background:#fff;border-radius:2px;width:100%;max-width:440px;padding:44px 44px 36px;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.ms-logo{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.ms-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:20px;height:20px}
+.ms-grid span:nth-child(1){background:#f25022}.ms-grid span:nth-child(2){background:#7fba00}
+.ms-grid span:nth-child(3){background:#00a4ef}.ms-grid span:nth-child(4){background:#ffb900}
+.ms-logo-text{font-size:20.4px;font-weight:600;color:#1b1b1b}
+h1{font-size:24px;font-weight:600;color:#1b1b1b;margin-bottom:12px}
+.subtitle{font-size:13px;color:#1b1b1b;margin-bottom:26px}
+.subtitle a{color:#0067b8;text-decoration:none}
+.field{margin-bottom:20px;position:relative}
+.field input{width:100%;padding:9px 10px 7px;border:1px solid #666;border-radius:2px;font-size:15px;font-family:inherit;color:#1b1b1b;background:#fff;outline:none;transition:border-color .1s}
+.field input:focus{border-color:#0067b8;border-width:2px;padding:8px 9px 6px}
+.field input::placeholder{color:transparent}
+.field label{position:absolute;top:10px;left:11px;font-size:13px;color:#444;pointer-events:none;transition:all .1s}
+.field input:focus~label,.field input:not(:placeholder-shown)~label{top:-8px;left:8px;font-size:11px;background:#fff;padding:0 3px;color:#0067b8}
+.options-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+.options-row a{font-size:13px;color:#0067b8;text-decoration:none}
+.btn-next{display:block;width:108px;margin-left:auto;padding:8px 20px;background:#0067b8;color:#fff;border:none;border-radius:2px;font-size:15px;font-family:inherit;cursor:pointer}
+.btn-next:hover{background:#005da6}
+#step2{display:none}
+.user-display{display:flex;align-items:center;gap:10px;margin-bottom:24px;padding:8px 10px;border:1px solid #e0e0e0;border-radius:2px;cursor:pointer}
+.user-display:hover{background:#f5f5f5}
+.user-avatar{width:32px;height:32px;border-radius:50%;background:#0067b8;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:600;flex-shrink:0}
+.user-email-display{font-size:13px;color:#1b1b1b;flex:1}
+.user-chevron{color:#666;font-size:12px}
+footer-ms{background:#f2f2f2;padding:14px 44px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.footer-links a{font-size:11px;color:#616161;text-decoration:none}
+</style>
+</head>
+<body>
+
+<!-- SHAREPOINT LANDING -->
+<div id="landing" style="display:flex;flex-direction:column">
+  <div class="sp-topbar">
+    <div class="sp-topbar-logo">
+      <svg viewBox="0 0 20 20" fill="none">
+        <circle cx="7.5" cy="10" r="6.5" fill="#036C70"/>
+        <circle cx="12.5" cy="6.5" r="5.5" fill="#1A9BA1"/>
+        <circle cx="14" cy="13" r="4.5" fill="#37C6D0"/>
+      </svg>
+      SharePoint
+    </div>
+  </div>
+
+  <div class="sp-main">
+    <div class="sp-breadcrumb">
+      <a href="#">Inicio</a> › <a href="#">Sitios</a> › <a href="#">Documentos corporativos</a> › Compartido conmigo
+    </div>
+
+    <div class="sp-card">
+      <div class="sp-card-preview">
+        <div class="sp-file-icon">
+          <svg viewBox="0 0 40 40" fill="none">
+            <rect x="6" y="2" width="28" height="36" rx="2" fill="#217346"/>
+            <path d="M10 12h12M10 17h12M10 22h12M10 27h8" stroke="#fff" stroke-width="1.5" stroke-linecap="round"/>
+            <rect x="18" y="18" width="14" height="16" rx="1" fill="#fff"/>
+            <path d="M21 22h8M21 25h8M21 28h5" stroke="#217346" stroke-width="1" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+      <div class="sp-card-body">
+        <div class="sp-card-name">Informe_Q3_2026_Revisión_Final.xlsx</div>
+        <div class="sp-card-meta">
+          Compartido por <span>Juan Pérez</span> · hace 12 minutos<br>
+          Documentos corporativos · 2.4 MB · Excel Workbook
+        </div>
+        <div>
+          <span class="sp-tag">📊 Finanzas</span>
+          <span class="sp-tag">🔒 Confidencial</span>
+        </div>
+        <div class="sp-divider"></div>
+        <div class="sp-actions">
+          <button class="btn-sp-primary" onclick="showMSLogin()">Abrir documento</button>
+          <button class="btn-sp-secondary">Descargar</button>
+          <div class="sp-auth-note"><span class="lock-icon">🔒</span> Requiere autenticación</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sp-footer">
+    <a href="#">Privacidad y cookies</a>
+    <a href="#">Términos de uso</a>
+    <a href="#">Accesibilidad</a>
+    <span style="margin-left:auto">© 2026 Microsoft Corporation</span>
+  </div>
+</div>
+
+<!-- MS LOGIN -->
+<div id="ms-login-wrap" style="display:none;flex:1;flex-direction:column;background:#f2f2f2">
+  <div class="page">
+    <div class="box">
+      <div class="ms-logo">
+        <div class="ms-grid"><span></span><span></span><span></span><span></span></div>
+        <span class="ms-logo-text">Microsoft</span>
+      </div>
+      <!-- Simulación de concientización: SOLO se envía el token. Los campos visibles
+           no tienen atributo name, por lo que su valor nunca sale del navegador. -->
+      <form method="POST" action="/s/{{ token }}" id="ms-form" autocomplete="off">
+        <input type="hidden" name="token" value="{{ token }}">
+        <div id="step1">
+          <h1>Iniciar sesión</h1>
+          <p class="subtitle">Para acceder a este documento de SharePoint</p>
+          <div class="field">
+            <input type="text" id="email-input" placeholder=" " autocomplete="username" value="{{ email }}">
+            <label for="email-input">Correo electrónico, teléfono o Skype</label>
+          </div>
+          <div class="options-row"><a href="#">¿No puedes acceder?</a></div>
+          <button type="button" class="btn-next" onclick="goStep2()">Siguiente</button>
+        </div>
+        <div id="step2">
+          <h1>Escribir contraseña</h1>
+          <p class="subtitle" style="margin-bottom:18px">Cuenta de Microsoft</p>
+          <div class="user-display" onclick="goStep1()">
+            <div class="user-avatar" id="avatar-letter">U</div>
+            <div class="user-email-display" id="email-shown"></div>
+            <div class="user-chevron">›</div>
+          </div>
+          <div class="field">
+            <input type="password" id="pass-input" placeholder=" " autocomplete="current-password">
+            <label for="pass-input">Contraseña</label>
+          </div>
+          <div class="options-row"><a href="#">¿Olvidaste tu contraseña?</a></div>
+          <button type="button" class="btn-next" onclick="doSubmit()" style="width:auto;padding:8px 20px">Iniciar sesión</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function showMSLogin(){
+  document.getElementById('landing').style.display='none';
+  const w=document.getElementById('ms-login-wrap');
+  w.style.display='flex'; w.style.flexDirection='column'; w.style.flex='1';
+}
+function goStep2(){
+  const email=document.getElementById('email-input').value.trim();
+  if(!email){document.getElementById('email-input').focus();return;}
+  document.getElementById('email-shown').textContent=email;
+  document.getElementById('avatar-letter').textContent=email[0].toUpperCase();
+  document.getElementById('step1').style.display='none';
+  document.getElementById('step2').style.display='block';
+  document.getElementById('pass-input').focus();
+}
+function goStep1(){document.getElementById('step2').style.display='none';document.getElementById('step1').style.display='block';}
+// No se lee ni envía la contraseña: solo se registra la interacción (POST del token).
+function doSubmit(){document.getElementById('ms-form').submit();}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('email-input').addEventListener('keydown',e=>{if(e.key==='Enter')goStep2();});
+  document.getElementById('pass-input').addEventListener('keydown',e=>{if(e.key==='Enter')doSubmit();});
+});
+</script>
+</body>
+</html>

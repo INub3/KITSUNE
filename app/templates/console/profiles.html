@@ -1,0 +1,85 @@
+{% extends "console/base.html" %}
+{% block title %}Perfiles de envío{% endblock %}
+{% block h1 %}送 Perfiles de envío{% endblock %}
+{% block crumb %}Configuración SMTP · guarda múltiples perfiles{% endblock %}
+{% block actions %}<a class="btn btn-ghost" href="/profiles?new=1">+ Nuevo perfil</a>{% endblock %}
+
+{% block content %}
+<div class="split">
+
+  <div class="list">
+    <div class="lhead">Perfiles <span class="dim">{{ profiles|length }}</span></div>
+    {% for p in profiles %}
+    <a class="item {{ 'active' if current and not new and current.id==p.id else '' }}" href="/profiles?id={{ p.id }}">
+      <span class="nm">{{ p.name }}</span>
+      <span class="meta">{{ p.host }}:{{ p.port }} · {{ p.from_email }}</span>
+    </a>
+    {% else %}<div class="empty">Aún no hay perfiles.</div>{% endfor %}
+  </div>
+
+  <div class="editor">
+    {% if new or current %}
+    <form method="post" action="/profiles/save">
+      <input type="hidden" name="id" value="{{ '' if new else (current.id if current else '') }}">
+      <h2 class="sec"><span class="seal">送</span> {{ 'Nuevo perfil' if new else current.name }}</h2>
+
+      <div class="field">
+        <label>Nombre del perfil</label>
+        <input type="text" name="name" value="{{ '' if new else current.name }}" placeholder="SMTP local" required>
+      </div>
+
+      <div class="row">
+        <div class="field"><label>Servidor / IP</label>
+          <input type="text" name="host" value="{{ 'localhost' if new else current.host }}" placeholder="localhost o 10.10.0.1"></div>
+        <div class="field"><label>Puerto</label>
+          <input type="number" name="port" value="{{ 25 if new else current.port }}"></div>
+      </div>
+
+      <div class="field">
+        <label class="toggle">
+          <input type="checkbox" name="use_tls" {{ 'checked' if not new and current.use_tls else '' }}>
+          <span class="track"></span><span class="tl">Usar STARTTLS</span>
+        </label>
+        <div class="hint">Para SMTP local (localhost:25) normalmente se deja desactivado.</div>
+      </div>
+
+      <div class="row">
+        <div class="field"><label>Usuario (opcional)</label>
+          <input type="text" name="username" value="{{ '' if new else (current.username or '') }}" placeholder="solo si el relay pide auth"></div>
+        <div class="field"><label>Contraseña (opcional)</label>
+          <input type="password" name="password" value="{{ '' if new else (current.password or '') }}" placeholder="••••••"></div>
+      </div>
+
+      <div class="row">
+        <div class="field"><label>Nombre de origen (From)</label>
+          <input type="text" name="from_name" value="{{ defaults.from_name if new else current.from_name }}"></div>
+        <div class="field"><label>Correo de origen (From)</label>
+          <input type="email" name="from_email" value="{{ defaults.from_email if new else current.from_email }}" required></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Guardar perfil</button>
+        {% if not new and current %}
+        <button class="btn btn-danger" type="submit" formaction="/profiles/{{ current.id }}/delete"
+                onclick="return confirm('¿Eliminar este perfil?')">Eliminar</button>
+        {% endif %}
+      </div>
+    </form>
+
+    {% if not new and current %}
+    <form method="post" action="/profiles/{{ current.id }}/test" class="form-actions" style="border-top:1px dashed var(--line);margin-top:22px">
+      <div class="field" style="flex:1;margin:0;min-width:220px">
+        <label>Enviar correo de prueba a</label>
+        <input type="email" name="to" placeholder="tu_cuenta@gmail.com">
+      </div>
+      <button class="btn btn-dim" type="submit">Probar envío</button>
+    </form>
+    {% endif %}
+
+    {% else %}
+    <div class="empty-big"><span class="big">送</span>Selecciona un perfil o crea uno nuevo.</div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

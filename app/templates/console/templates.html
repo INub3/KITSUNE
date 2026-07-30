@@ -1,0 +1,85 @@
+{% extends "console/base.html" %}
+{% block title %}Plantillas{% endblock %}
+{% block h1 %}文 Plantillas de correo{% endblock %}
+{% block crumb %}Edita en vivo · placeholders {{ '{{url}}' }} {{ '{{pixel}}' }} {{ '{{email}}' }} {{ '{{first_name}}' }}{% endblock %}
+{% block actions %}<a class="btn btn-ghost" href="/templates?new=1">+ Nueva plantilla</a>{% endblock %}
+
+{% block content %}
+<div class="split">
+
+  <div class="list">
+    <div class="lhead">Plantillas <span class="dim">{{ items|length }}</span></div>
+    {% for t in items %}
+    <a class="item {{ 'active' if current and not new and current.id==t.id else '' }}" href="/templates?id={{ t.id }}">
+      <span class="nm">{{ t.name }}</span>
+      <span class="meta">{{ t.subject }} · landing: {{ t.landing }}</span>
+    </a>
+    {% else %}<div class="empty">Aún no hay plantillas.</div>{% endfor %}
+  </div>
+
+  <div class="editor">
+    {% if new or current %}
+    <form method="post" action="/templates/save" id="tpl-form">
+      <input type="hidden" name="id" value="{{ '' if new else (current.id if current else '') }}">
+      <h2 class="sec"><span class="seal">文</span> {{ 'Nueva plantilla' if new else current.name }}</h2>
+
+      <div class="row">
+        <div class="field"><label>Nombre</label>
+          <input type="text" name="name" value="{{ '' if new else current.name }}" required></div>
+        <div class="field"><label>Landing asociada</label>
+          <select name="landing">
+            {% for l in landings %}
+            <option value="{{ l }}" {{ 'selected' if not new and current.landing==l else ('selected' if new and l=='microsoft' else '') }}>{{ l }}</option>
+            {% endfor %}
+          </select></div>
+      </div>
+
+      <div class="field"><label>Asunto</label>
+        <input type="text" name="subject" value="{{ '' if new else current.subject }}" required></div>
+
+      <div class="field"><label>Cuerpo HTML</label>
+        <textarea name="html" id="tpl-html" style="min-height:220px">{{ '' if new else current.html }}</textarea>
+        <div class="hint">Incluye <code>&lt;img src="{{ '{{pixel}}' }}"&gt;</code> para el tracking de apertura y un enlace a <code>{{ '{{url}}' }}</code>.</div>
+      </div>
+
+      <div class="field"><label>Cuerpo texto plano (fallback)</label>
+        <textarea name="text" style="min-height:110px">{{ '' if new else current.text }}</textarea></div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Guardar plantilla</button>
+        <button class="btn btn-dim" type="button" onclick="livePreview()">Previsualizar</button>
+        {% if not new and current %}
+        <button class="btn btn-danger" type="submit" formaction="/templates/{{ current.id }}/delete"
+                onclick="return confirm('¿Eliminar esta plantilla?')">Eliminar</button>
+        {% endif %}
+      </div>
+    </form>
+
+    <div class="field" style="margin-top:22px">
+      <label>Vista previa (datos de ejemplo)</label>
+      <iframe class="preview-frame" id="tpl-preview"
+              {% if not new and current %}src="/templates/{{ current.id }}/preview"{% endif %}></iframe>
+    </div>
+
+    {% else %}
+    <div class="empty-big"><span class="big">文</span>Selecciona una plantilla o crea una nueva.</div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script>
+// Preview en vivo: envía el HTML actual del editor al backend y lo pinta en el iframe,
+// sin necesidad de guardar (POST a /templates/preview).
+function livePreview(){
+  var html = document.getElementById('tpl-html').value;
+  var f = document.getElementById('tpl-preview');
+  fetch('/templates/preview', {method:'POST',
+    headers:{'Content-Type':'application/x-www-form-urlencoded'},
+    body:'html=' + encodeURIComponent(html)})
+    .then(function(r){return r.text();})
+    .then(function(t){ f.srcdoc = t; })
+    .catch(function(){});
+}
+</script>
+{% endblock %}

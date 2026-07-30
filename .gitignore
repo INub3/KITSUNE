@@ -1,0 +1,18 @@
+# Entorno Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Base de datos y datos de campaña (resultados del engagement)
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Listas de objetivos reales (nunca versionar destinatarios)
+lista.csv
+
+# Sistema
+.DS_Store
+Thumbs.db

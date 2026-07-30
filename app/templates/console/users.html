@@ -1,0 +1,77 @@
+{% extends "console/base.html" %}
+{% block title %}Usuarios{% endblock %}
+{% block h1 %}的 Usuarios · objetivos{% endblock %}
+{% block crumb %}Destinatarios de la simulación, organizados en grupos{% endblock %}
+{% block content %}
+<div class="split">
+
+  <div class="list">
+    <div class="lhead">Grupos <span class="dim">{{ groups|length }}</span></div>
+    {% for g in groups %}
+    <a class="item {{ 'active' if current and current.id==g.id else '' }}" href="/users?group={{ g.id }}">
+      <span class="nm">{{ g.name }}</span>
+      <span class="meta">{{ g.n }} objetivo(s)</span>
+    </a>
+    {% else %}<div class="empty">Aún no hay grupos.</div>{% endfor %}
+    <form method="post" action="/users/group/save" style="padding:14px 16px;border-top:1px solid var(--line)">
+      <div class="field" style="margin-bottom:10px">
+        <label>Nuevo grupo</label>
+        <input type="text" name="name" placeholder="Ej. Finanzas Q3" required>
+      </div>
+      <button class="btn btn-ghost btn-sm" type="submit">Crear grupo</button>
+    </form>
+  </div>
+
+  <div class="editor">
+    {% if current %}
+    <h2 class="sec"><span class="seal">的</span> {{ current.name }} <span class="en">{{ targets|length }} objetivos</span></h2>
+
+    <form method="post" action="/users/{{ current.id }}/add" class="row3" style="align-items:end">
+      <div class="field" style="margin:0"><label>Correo</label><input type="email" name="email" required></div>
+      <div class="field" style="margin:0"><label>Nombre</label><input type="text" name="first_name"></div>
+      <div class="field" style="margin:0"><label>Apellido</label><input type="text" name="last_name"></div>
+      <div class="field" style="margin:0;grid-column:1/2"><label>Puesto</label><input type="text" name="position"></div>
+      <div class="form-actions" style="margin:0;padding:0;border:none;grid-column:2/4;justify-content:flex-end">
+        <button class="btn btn-primary" type="submit">+ Agregar objetivo</button>
+      </div>
+    </form>
+
+    <div class="tablewrap" style="margin-top:18px">
+      <table class="grid">
+        <thead><tr><th>Correo</th><th>Nombre</th><th>Puesto</th><th></th></tr></thead>
+        <tbody>
+        {% for t in targets %}
+        <tr>
+          <td>{{ t.email }}</td>
+          <td>{{ (t.first_name ~ ' ' ~ t.last_name)|trim or '—' }}</td>
+          <td class="dim">{{ t.position or '—' }}</td>
+          <td class="num">
+            <form method="post" action="/users/target/{{ t.id }}/delete" class="inline">
+              <button class="btn btn-danger btn-sm" type="submit">Quitar</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="empty-big"><span class="big">的</span>Grupo vacío. Agrega objetivos o importa un CSV.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <form method="post" action="/users/{{ current.id }}/import" style="margin-top:22px">
+      <div class="field">
+        <label>Importar CSV (header: email[,first_name,last_name,position])</label>
+        <textarea name="csv" placeholder="email,first_name,last_name&#10;ana@cliente.com,Ana,García&#10;luis@cliente.com,Luis,Pérez"></textarea>
+      </div>
+      <button class="btn btn-dim" type="submit">Importar objetivos</button>
+      <button class="btn btn-danger" type="submit" formaction="/users/group/{{ current.id }}/delete"
+              onclick="return confirm('¿Eliminar el grupo y todos sus objetivos?')" style="float:right">Eliminar grupo</button>
+    </form>
+
+    {% else %}
+    <div class="empty-big"><span class="big">的</span>Crea un grupo para empezar a cargar objetivos.</div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

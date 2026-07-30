@@ -1,0 +1,92 @@
+{% extends "console/base.html" %}
+{% block title %}Phishing{% endblock %}
+{% block h1 %}狩 Phishing · campañas{% endblock %}
+{% block crumb %}Combina perfil + plantilla + grupo y lanza la simulación{% endblock %}
+{% block content %}
+
+<div class="panel">
+  <h2 class="sec"><span class="seal">狩</span> Nueva campaña <span class="en">New campaign</span></h2>
+
+  {% if not profiles or not templates or not groups %}
+  <div class="flash err">Necesitas al menos un
+    {% if not profiles %} <a href="/profiles">perfil de envío</a>{% endif %}
+    {% if not templates %}{{ ', ' if not profiles }}<a href="/templates">plantilla</a>{% endif %}
+    {% if not groups %}{{ ', ' if not profiles or not templates }}<a href="/users">grupo de objetivos</a>{% endif %}
+    antes de crear una campaña.</div>
+  {% endif %}
+
+  <form method="post" action="/campaigns/save">
+    <div class="row">
+      <div class="field"><label>Nombre de la campaña</label>
+        <input type="text" name="name" placeholder="Ej. Q3 · Finanzas" required></div>
+      <div class="field"><label>Base URL (dominio de la infraestructura)</label>
+        <input type="text" name="base_url" value="{{ default_base }}"></div>
+    </div>
+
+    <div class="row3">
+      <div class="field"><label>Perfil de envío</label>
+        <select name="profile_id" required>
+          <option value="">—</option>
+          {% for p in profiles %}<option value="{{ p.id }}">{{ p.name }}</option>{% endfor %}
+        </select></div>
+      <div class="field"><label>Plantilla</label>
+        <select name="template_id" required>
+          <option value="">—</option>
+          {% for t in templates %}<option value="{{ t.id }}">{{ t.name }}</option>{% endfor %}
+        </select></div>
+      <div class="field"><label>Grupo de objetivos</label>
+        <select name="group_id" required>
+          <option value="">—</option>
+          {% for g in groups %}<option value="{{ g.id }}">{{ g.name }} ({{ g.n }})</option>{% endfor %}
+        </select></div>
+    </div>
+
+    <div class="row">
+      <div class="field"><label>Delay mínimo (s)</label><input type="number" name="delay_min" value="{{ dmin }}"></div>
+      <div class="field"><label>Delay máximo (s)</label><input type="number" name="delay_max" value="{{ dmax }}"></div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Crear como borrador</button>
+      <span class="hint">Se crea en estado <b>borrador</b>; la revisas y luego la lanzas desde la tabla.</span>
+    </div>
+  </form>
+</div>
+
+<div class="tablewrap">
+  <table class="grid">
+    <thead><tr><th>Campaña</th><th>Estado</th><th>Perfil</th><th>Plantilla</th><th>Grupo</th>
+        <th class="num">Enviados</th><th class="num">Inter.</th><th>Creada</th><th></th></tr></thead>
+    <tbody>
+    {% for c in campaigns %}
+    <tr>
+      <td><b>{{ c.name }}</b><br><span class="mono dim">{{ c.base_url }}</span></td>
+      <td><span class="status s-{{ c.status }}">{{ c.status }}</span></td>
+      <td>{{ c.profile_name or '—' }}</td>
+      <td><span class="tag pt">{{ c.template_name or '—' }}</span></td>
+      <td>{{ c.group_name or '—' }}</td>
+      <td class="num">{{ c.sent }}</td>
+      <td class="num">{{ c.subs }}</td>
+      <td class="ts">{{ c.created_at }}</td>
+      <td class="num">
+        {% if c.status in ['draft','error'] %}
+        <form method="post" action="/campaigns/{{ c.id }}/launch" class="inline"
+              onsubmit="return confirm('¿Lanzar la campaña «{{ c.name }}»? Se enviarán correos reales a los objetivos.')">
+          <button class="btn btn-primary btn-sm" type="submit">Lanzar</button>
+        </form>
+        {% elif c.status=='running' %}<span class="dim">enviando…</span>
+        {% else %}<a class="btn btn-dim btn-sm" href="/dashboard?campaign={{ c.id }}">Ver</a>{% endif %}
+        <form method="post" action="/campaigns/{{ c.id }}/delete" class="inline"
+              onsubmit="return confirm('¿Eliminar la campaña y sus resultados?')">
+          <button class="btn btn-danger btn-sm" type="submit">✕</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="9" class="empty-big"><span class="big">狩</span>Aún no hay campañas.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

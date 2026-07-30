@@ -1,0 +1,120 @@
+{% extends "console/base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block h1 %}狩 Dashboard{% endblock %}
+{% block crumb %}Tracking de concientización · sin captura de credenciales · horas en UTC{% endblock %}
+
+{% block actions %}
+  <div class="selectbar">
+    <form method="get" action="/dashboard" class="selectbar">
+      <select name="campaign" onchange="this.form.submit()">
+        <option value="">Todas las campañas</option>
+        {% for c in campaigns %}
+        <option value="{{ c.id }}" {{ 'selected' if selected==c.id|string else '' }}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </form>
+    <a class="btn btn-ghost btn-sm" href="/dashboard/export.csv{{ '?campaign=' ~ selected if selected else '' }}">⬇ CSV</a>
+  </div>
+{% endblock %}
+
+{% block content %}
+
+<div class="cards">
+  <div class="card"><span class="wm">送</span>
+    <div class="n">{{ stats.total }}</div><div class="l">Enviados</div>
+    <div class="r">{{ stats.pending }} sin abrir</div></div>
+  <div class="card o"><span class="wm">開</span>
+    <div class="n">{{ stats.opened }}</div><div class="l">Abrieron</div>
+    <div class="r">{{ stats.open_rate }}% de apertura</div></div>
+  <div class="card c"><span class="wm">押</span>
+    <div class="n">{{ stats.clicked }}</div><div class="l">Clic en enlace</div>
+    <div class="r">{{ stats.click_rate }}% de clic</div></div>
+  <div class="card s"><span class="wm">罠</span>
+    <div class="n">{{ stats.submitted }}</div><div class="l">Interactuaron</div>
+    <div class="r">{{ stats.submit_rate }}% de interacción</div></div>
+</div>
+
+<div class="grid2">
+  <div class="panel funnel">
+    <h2 class="sec"><span class="seal">火</span> Embudo de la campaña <span class="en">Kitsunebi</span></h2>
+    <div class="stage"><div class="frow"><span class="lbl"><b>送信</b>Enviados</span><span class="val">{{ stats.total }} · 100%</span></div>
+      <div class="bar b-sent"><span style="width:100%"></span></div></div>
+    <div class="stage"><div class="frow"><span class="lbl"><b>開封</b>Abrieron</span><span class="val">{{ stats.opened }} · {{ stats.open_rate }}%</span></div>
+      <div class="bar b-open"><span style="width:{{ stats.open_rate }}%"></span></div></div>
+    <div class="stage"><div class="frow"><span class="lbl"><b>点击</b>Clic en enlace</span><span class="val">{{ stats.clicked }} · {{ stats.click_rate }}%</span></div>
+      <div class="bar b-click"><span style="width:{{ stats.click_rate }}%"></span></div></div>
+    <div class="stage"><div class="frow"><span class="lbl"><b>入力</b>Interactuaron</span><span class="val">{{ stats.submitted }} · {{ stats.submit_rate }}%</span></div>
+      <div class="bar b-sub"><span style="width:{{ stats.submit_rate }}%"></span></div></div>
+
+    {% set tails = (stats.submit_rate * 0.09) | round(0) | int %}
+    <div class="kyubi">
+      <div class="cap">
+        <span class="t">九尾 · Nivel de exposición <span>(colas ∝ % interacción)</span></span>
+        <span class="lv">{{ tails }}/9</span>
+      </div>
+      <div class="tails">
+        {% for i in range(1, 10) %}<div class="tail {{ 'lit' if i <= tails else '' }}"></div>{% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2 class="sec"><span class="seal">囮</span> Por pretexto <span class="en">Pretext</span></h2>
+    <table class="mini">
+      <thead><tr><th>Pretexto</th><th class="num">Env.</th><th class="num">Abrió</th><th class="num">Clic</th><th class="num">Inter.</th></tr></thead>
+      <tbody>
+      {% for name, a in by_pretext.items() %}
+      <tr><td class="k">{{ name }}</td><td class="num">{{ a.total }}</td><td class="num">{{ a.opened }}</td><td class="num">{{ a.clicked }}</td><td class="num">{{ a.submitted }}</td></tr>
+      {% else %}<tr><td colspan="5" class="dim">Sin datos.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel">
+  <h2 class="sec"><span class="seal">門</span> Por landing <span class="en">Landing</span></h2>
+  <table class="mini">
+    <thead><tr><th>Landing</th><th class="num">Env.</th><th class="num">Abrió</th><th class="num">Clic</th><th class="num">Interactuaron</th></tr></thead>
+    <tbody>
+    {% for name, a in by_landing.items() %}
+    <tr><td class="k">{{ name }}</td><td class="num">{{ a.total }}</td><td class="num">{{ a.opened }}</td><td class="num">{{ a.clicked }}</td><td class="num">{{ a.submitted }}</td></tr>
+    {% else %}<tr><td colspan="5" class="dim">Sin datos.</td></tr>{% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="tablewrap">
+  <table class="grid">
+    <thead><tr><th>Correo</th><th>Estado</th><th>Pretexto</th><th>Landing</th>
+        <th>Enviado</th><th>Abrió</th><th>Clic</th><th>Interacción</th><th>IP</th><th>User-Agent</th></tr></thead>
+    <tbody>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.email }}</td>
+      <td>
+        {% if r.submitted_at %}<span class="badge st-sub">Interacción</span>
+        {% elif r.clicked_at %}<span class="badge st-click">Clic</span>
+        {% elif r.opened_at %}<span class="badge st-open">Abrió</span>
+        {% else %}<span class="badge st-sent">Enviado</span>{% endif %}
+      </td>
+      <td><span class="tag pt">{{ r.pretext }}</span></td>
+      <td>{% if r.landing %}<span class="tag ld">{{ r.landing }}</span>{% else %}<span class="ts none">—</span>{% endif %}</td>
+      <td class="ts">{{ r.sent_at or "—" }}</td>
+      <td class="ts {{ '' if r.opened_at else 'none' }}">{{ r.opened_at or "—" }}</td>
+      <td class="ts {{ '' if r.clicked_at else 'none' }}">{{ r.clicked_at or "—" }}</td>
+      <td class="ts {{ '' if r.submitted_at else 'none' }}">{{ r.submitted_at or "—" }}</td>
+      <td class="ts">{{ r.ip or "—" }}</td>
+      <td class="ua" title="{{ r.user_agent or '' }}">{{ r.user_agent or "—" }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="10" class="empty-big"><span class="big">狐</span>Aún no hay objetivos registrados.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="foot"><span class="torii">⛩</span>
+  Reporte desde <code>kitsune.db</code> · marcas de tiempo en UTC · exporta el CSV para el entregable de decommissioning.
+</div>
+
+{% endblock %}

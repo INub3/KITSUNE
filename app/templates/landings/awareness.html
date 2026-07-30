@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulación de concientización</title>
+<style>
+  :root{--navy:#1f3a5f;--ink:#22272e;--muted:#6b7580;--line:#e6e9ee;--ok:#1e7e34;--warn:#c98a00;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:#f4f5f7;font-family:Segoe UI,Arial,sans-serif;color:var(--ink);
+       line-height:1.6;}
+  .top{background:var(--navy);color:#fff;padding:16px 28px;font-size:18px;font-weight:600;}
+  .wrap{max-width:680px;margin:32px auto;padding:0 20px;}
+  .card{background:#fff;border-radius:12px;padding:32px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+  .hero{display:flex;align-items:center;gap:16px;margin-bottom:8px;}
+  .hero .icon{font-size:40px;line-height:1;}
+  h1{font-size:24px;margin:0;color:var(--navy);}
+  .lead{font-size:16px;color:var(--ink);margin:16px 0 24px;}
+  .note{background:#fff8e6;border-left:4px solid var(--warn);padding:12px 16px;border-radius:6px;
+        font-size:14px;margin:20px 0;}
+  h2{font-size:15px;color:var(--navy);margin:26px 0 10px;}
+  ul{margin:0;padding-left:20px;}
+  li{margin-bottom:8px;font-size:14.5px;}
+  .safe{background:#eaf6ee;border:1px solid #cdead6;color:var(--ok);border-radius:8px;
+        padding:14px 16px;font-size:13.5px;margin-top:24px;}
+  .foot{font-size:12px;color:var(--muted);margin-top:24px;text-align:center;}
+</style></head><body>
+<div class="top">IST Américas · Concientización en Seguridad</div>
+<div class="wrap">
+  <div class="card">
+    <div class="hero">
+      <span class="icon">🛡️</span>
+      <h1>Esto fue una simulación de phishing</h1>
+    </div>
+    <p class="lead">
+      El correo que abriste formaba parte de un <b>ejercicio autorizado de concientización</b>.
+      No ocurrió ningún incidente real y no se vio comprometida ninguna cuenta.
+    </p>
+
+    <div class="note">
+      <b>Importante:</b> aunque hayas escrito una contraseña en la página anterior,
+      <b>no fue capturada ni almacenada</b>. El ejercicio solo registra que hubo interacción,
+      nunca las credenciales.
+    </div>
+
+    <h2>Señales que delataban el engaño</h2>
+    <ul>
+      <li><b>Urgencia artificial</b>: "vence en 24 horas", "actividad inusual", presión para actuar ya.</li>
+      <li><b>Remitente y dominio</b>: revisa la dirección real del emisor, no solo el nombre visible.</li>
+      <li><b>Enlaces sospechosos</b>: pasa el cursor sobre el botón y verifica el dominio antes de hacer clic.</li>
+      <li><b>Solicitud de credenciales</b>: los servicios legítimos rara vez piden que "reingreses" tu contraseña por correo.</li>
+    </ul>
+
+    <h2>Qué hacer la próxima vez</h2>
+    <ul>
+      <li>No hagas clic ni ingreses datos si algo no cuadra.</li>
+      <li>Accede al servicio escribiendo tú la URL oficial, no desde el enlace del correo.</li>
+      <li>Reporta el mensaje al equipo de seguridad de tu organización.</li>
+    </ul>
+
+    <div class="safe">
+      ✔ No se almacenó ninguna contraseña ni dato personal. Este ejercicio busca fortalecer
+      tus reflejos ante ataques reales.
+    </div>
+
+    <div class="foot">Ejercicio de concientización autorizado · IST Américas</div>
+  </div>
+</div>
+</body></html>
